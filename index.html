@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DSA Tracker — Sep 22 → Dec 15</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel2: #1e222b;
+    --border: #262b36;
+    --text: #e6e8ee;
+    --muted: #8a91a0;
+    --accent: #7c9cff;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --blue: #60a5fa;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 15px; margin: 24px 0 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .today-title { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .today-problem { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .today-meta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  .btn { display: inline-block; background: var(--accent); color: #0b0d13; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; border: none; cursor: pointer; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn + .btn { margin-left: 8px; }
+  .stats { display: flex; gap: 14px; }
+  .stat { flex: 1; background: var(--panel2); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 700; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .bar { height: 8px; background: var(--panel2); border-radius: 4px; overflow: hidden; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); transition: width .3s ease; }
+  .week { margin-top: 14px; }
+  .week-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--panel2); border-radius: 8px 8px 0 0; cursor: pointer; user-select: none; }
+  .week-head:hover { background: #232833; }
+  .week-title { font-weight: 600; }
+  .week-meta { font-size: 12px; color: var(--muted); }
+  .week-body { border: 1px solid var(--border); border-top: 0; border-radius: 0 0 8px 8px; padding: 6px 0; display: none; }
+  .week.open .week-body { display: block; }
+  .prob { display: grid; grid-template-columns: 24px 1fr auto auto; gap: 10px; align-items: center; padding: 8px 14px; border-bottom: 1px solid var(--border); }
+  .prob:last-child { border-bottom: 0; }
+  .prob a { color: var(--text); text-decoration: none; }
+  .prob a:hover { color: var(--accent); }
+  .diff { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .diff.Easy { background: rgba(74,222,128,0.15); color: var(--green); }
+  .diff.Medium { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .diff.Hard { background: rgba(248,113,113,0.15); color: var(--red); }
+  select { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+  .dot.solo { background: var(--green); }
+  .dot.editorial { background: var(--yellow); }
+  .dot.redo { background: var(--red); }
+  .footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 30px; }
+  .link { color: var(--accent); cursor: pointer; text-decoration: underline; background: none; border: 0; font-size: 12px; padding: 0; }
+</style>
+</head>
+<body>
+
+<h1>DSA Tracker</h1>
+<div class="sub">Sep 22, 2026 → Dec 15, 2026 · NeetCode 150 subset · 12 weeks · C++</div>
+
+<div class="grid">
+  <div class="card" id="today-card">
+    <div class="today-title">Today · <span id="today-date"></span></div>
+    <div class="today-problem" id="today-problem">—</div>
+    <div class="today-meta" id="today-meta"></div>
+    <a class="btn" id="today-link" target="_blank" rel="noopener">Open on Leetcode</a>
+    <button class="btn ghost" id="mark-solo">Solved solo</button>
+    <button class="btn ghost" id="mark-editorial">Solved w/ editorial</button>
+  </div>
+
+  <div class="card">
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="streak">0</div><div class="stat-label">Streak</div></div>
+      <div class="stat"><div class="stat-num" id="best-streak">0</div><div class="stat-label">Best</div></div>
+      <div class="stat"><div class="stat-num" id="done-count">0</div><div class="stat-label">Done</div></div>
+    </div>
+    <div style="margin-top: 14px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:6px;">
+        <span>Overall</span><span id="overall-pct">0%</span>
+      </div>
+      <div class="bar"><div id="overall-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+</div>
+
+<h2>Weeks</h2>
+<div id="weeks"></div>
+
+<div class="footer">
+  Data lives in your browser (localStorage · key <code>dsa-tracker-v1</code>) ·
+  <button class="link" id="export-btn">Export JSON</button> ·
+  <button class="link" id="reset-btn">Reset all</button>
+</div>
+
+<script>
+const PLAN = [
+  { week: 1, title: "Arrays & Hashing (part 1)", problems: [
+    ["Contains Duplicate", "contains-duplicate", "Easy"],
+    ["Valid Anagram", "valid-anagram", "Easy"],
+    ["Two Sum", "two-sum", "Easy"],
+    ["Group Anagrams", "group-anagrams", "Medium"],
+    ["Top K Frequent Elements", "top-k-frequent-elements", "Medium"],
+  ]},
+  { week: 2, title: "Arrays & Hashing (part 2)", problems: [
+    ["Encode and Decode Strings", "encode-and-decode-strings", "Medium"],
+    ["Product of Array Except Self", "product-of-array-except-self", "Medium"],
+    ["Valid Sudoku", "valid-sudoku", "Medium"],
+    ["Longest Consecutive Sequence", "longest-consecutive-sequence", "Medium"],
+  ]},
+  { week: 3, title: "Two Pointers + Sliding Window", problems: [
+    ["Valid Palindrome", "valid-palindrome", "Easy"],
+    ["Two Sum II - Input Array Is Sorted", "two-sum-ii-input-array-is-sorted", "Medium"],
+    ["3Sum", "3sum", "Medium"],
+    ["Container With Most Water", "container-with-most-water", "Medium"],
+    ["Best Time to Buy and Sell Stock", "best-time-to-buy-and-sell-stock", "Easy"],
+    ["Longest Substring Without Repeating Characters", "longest-substring-without-repeating-characters", "Medium"],
+    ["Longest Repeating Character Replacement", "longest-repeating-character-replacement", "Medium"],
+  ]},
+  { week: 4, title: "Stack + Binary Search", problems: [
+    ["Valid Parentheses", "valid-parentheses", "Easy"],
+    ["Min Stack", "min-stack", "Medium"],
+    ["Evaluate Reverse Polish Notation", "evaluate-reverse-polish-notation", "Medium"],
+    ["Daily Temperatures", "daily-temperatures", "Medium"],
+    ["Binary Search", "binary-search", "Easy"],
+    ["Search a 2D Matrix", "search-a-2d-matrix", "Medium"],
+    ["Koko Eating Bananas", "koko-eating-bananas", "Medium"],
+    ["Find Minimum in Rotated Sorted Array", "find-minimum-in-rotated-sorted-array", "Medium"],
+  ]},
+  { week: 5, title: "Linked List", problems: [
+    ["Reverse Linked List", "reverse-linked-list", "Easy"],
+    ["Merge Two Sorted Lists", "merge-two-sorted-lists", "Easy"],
+    ["Reorder List", "reorder-list", "Medium"],
+    ["Remove Nth Node From End of List", "remove-nth-node-from-end-of-list", "Medium"],
+    ["Linked List Cycle", "linked-list-cycle", "Easy"],
+    ["Merge k Sorted Lists", "merge-k-sorted-lists", "Hard"],
+  ]},
+  { week: 6, title: "Trees", problems: [
+    ["Invert Binary Tree", "invert-binary-tree", "Easy"],
+    ["Maximum Depth of Binary Tree", "maximum-depth-of-binary-tree", "Easy"],
+    ["Same Tree", "same-tree", "Easy"],
+    ["Subtree of Another Tree", "subtree-of-another-tree", "Easy"],
+    ["Lowest Common Ancestor of a BST", "lowest-common-ancestor-of-a-binary-search-tree", "Medium"],
+    ["Binary Tree Level Order Traversal", "binary-tree-level-order-traversal", "Medium"],
+    ["Validate Binary Search Tree", "validate-binary-search-tree", "Medium"],
+    ["Kth Smallest Element in a BST", "kth-smallest-element-in-a-bst", "Medium"],
+    ["Construct Binary Tree from Preorder and Inorder Traversal", "construct-binary-tree-from-preorder-and-inorder-traversal", "Medium"],
+  ]},
+  { week: 7, title: "Tries + Heap", problems: [
+    ["Implement Trie (Prefix Tree)", "implement-trie-prefix-tree", "Medium"],
+    ["Design Add and Search Words Data Structure", "design-add-and-search-words-data-structure", "Medium"],
+    ["Kth Largest Element in a Stream", "kth-largest-element-in-a-stream", "Easy"],
+    ["Last Stone Weight", "last-stone-weight", "Easy"],
+    ["K Closest Points to Origin", "k-closest-points-to-origin", "Medium"],
+    ["Kth Largest Element in an Array", "kth-largest-element-in-an-array", "Medium"],
+    ["Task Scheduler", "task-scheduler", "Medium"],
+  ]},
+  { week: 8, title: "Backtracking", problems: [
+    ["Subsets", "subsets", "Medium"],
+    ["Combination Sum", "combination-sum", "Medium"],
+    ["Permutations", "permutations", "Medium"],
+    ["Subsets II", "subsets-ii", "Medium"],
+    ["Word Search", "word-search", "Medium"],
+    ["Palindrome Partitioning", "palindrome-partitioning", "Medium"],
+  ]},
+  { week: 9, title: "Graphs (part 1)", problems: [
+    ["Number of Islands", "number-of-islands", "Medium"],
+    ["Clone Graph", "clone-graph", "Medium"],
+    ["Pacific Atlantic Water Flow", "pacific-atlantic-water-flow", "Medium"],
+    ["Course Schedule", "course-schedule", "Medium"],
+    ["Rotting Oranges", "rotting-oranges", "Medium"],
+  ]},
+  { week: 10, title: "Graphs (part 2) + Union-Find", problems: [
+    ["Number of Connected Components in Undirected Graph", "number-of-connected-components-in-an-undirected-graph", "Medium"],
+    ["Graph Valid Tree", "graph-valid-tree", "Medium"],
+    ["Walls and Gates", "walls-and-gates", "Medium"],
+    ["Redundant Connection", "redundant-connection", "Medium"],
+    ["Word Ladder", "word-ladder", "Hard"],
+  ]},
+  { week: 11, title: "1-D DP", problems: [
+    ["Climbing Stairs", "climbing-stairs", "Easy"],
+    ["House Robber", "house-robber", "Medium"],
+    ["House Robber II", "house-robber-ii", "Medium"],
+    ["Longest Palindromic Substring", "longest-palindromic-substring", "Medium"],
+    ["Palindromic Substrings", "palindromic-substrings", "Medium"],
+    ["Decode Ways", "decode-ways", "Medium"],
+    ["Coin Change", "coin-change", "Medium"],
+  ]},
+  { week: 12, title: "2-D DP + Greedy + Intervals", problems: [
+    ["Longest Common Subsequence", "longest-common-subsequence", "Medium"],
+    ["Longest Increasing Subsequence", "longest-increasing-subsequence", "Medium"],
+    ["Unique Paths", "unique-paths", "Medium"],
+    ["Maximum Subarray", "maximum-subarray", "Medium"],
+    ["Jump Game", "jump-game", "Medium"],
+    ["Gas Station", "gas-station", "Medium"],
+    ["Merge Intervals", "merge-intervals", "Medium"],
+    ["Non-overlapping Intervals", "non-overlapping-intervals", "Medium"],
+  ]},
+];
+
+const KEY = "dsa-tracker-v1";
+const STATES = ["not-started", "solo", "editorial", "redo"];
+const STATE_LABEL = { "not-started": "Not started", "solo": "Solved solo", "editorial": "Solved w/ editorial", "redo": "Need redo" };
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
+}
+function save(data) { localStorage.setItem(KEY, JSON.stringify(data)); }
+
+let state = load();
+// shape: { "w1-Two Sum": { status: "solo", date: "2026-09-23" }, ... }, plus _dates: { "2026-09-23": true }
+
+function keyOf(week, title) { return `w${week}::${title}`; }
+function today() { return new Date().toISOString().slice(0, 10); }
+
+function setStatus(week, title, status) {
+  const k = keyOf(week, title);
+  if (status === "not-started") {
+    delete state[k];
+  } else {
+    state[k] = { status, date: state[k]?.date || today() };
+    state._dates = state._dates || {};
+    state._dates[today()] = true;
+  }
+  save(state);
+  render();
+}
+
+function firstUnfinished() {
+  for (const w of PLAN) {
+    for (const [title, slug, diff] of w.problems) {
+      const s = state[keyOf(w.week, title)];
+      if (!s || s.status === "redo") return { week: w.week, weekTitle: w.title, title, slug, diff };
+    }
+  }
+  return null;
+}
+
+function computeStreak() {
+  const dates = Object.keys(state._dates || {}).sort();
+  if (!dates.length) return { current: 0, best: 0 };
+  let best = 1, cur = 1;
+  for (let i = 1; i < dates.length; i++) {
+    const prev = new Date(dates[i-1]);
+    const now = new Date(dates[i]);
+    const diff = Math.round((now - prev) / 86400000);
+    cur = diff === 1 ? cur + 1 : 1;
+    best = Math.max(best, cur);
+  }
+  // current streak only counts if last active day is today or yesterday
+  const last = new Date(dates[dates.length - 1]);
+  const t = new Date(today());
+  const gap = Math.round((t - last) / 86400000);
+  const current = gap <= 1 ? cur : 0;
+  return { current, best };
+}
+
+function totalProblems() { return PLAN.reduce((n, w) => n + w.problems.length, 0); }
+function doneCount() {
+  let n = 0;
+  for (const w of PLAN) for (const [t] of w.problems) {
+    const s = state[keyOf(w.week, t)];
+    if (s && (s.status === "solo" || s.status === "editorial")) n++;
+  }
+  return n;
+}
+
+function render() {
+  // today card
+  const nxt = firstUnfinished();
+  document.getElementById("today-date").textContent = today();
+  if (nxt) {
+    document.getElementById("today-problem").textContent = nxt.title;
+    document.getElementById("today-meta").textContent = `Week ${nxt.week} · ${nxt.weekTitle} · ${nxt.diff}`;
+    const link = document.getElementById("today-link");
+    link.href = `https://leetcode.com/problems/${nxt.slug}/`;
+    link.style.display = "inline-block";
+    document.getElementById("mark-solo").onclick = () => setStatus(nxt.week, nxt.title, "solo");
+    document.getElementById("mark-editorial").onclick = () => setStatus(nxt.week, nxt.title, "editorial");
+    document.getElementById("mark-solo").style.display = "inline-block";
+    document.getElementById("mark-editorial").style.display = "inline-block";
+  } else {
+    document.getElementById("today-problem").textContent = "All 77 problems done. Go get that offer.";
+    document.getElementById("today-meta").textContent = "";
+    document.getElementById("today-link").style.display = "none";
+    document.getElementById("mark-solo").style.display = "none";
+    document.getElementById("mark-editorial").style.display = "none";
+  }
+
+  // stats
+  const { current, best } = computeStreak();
+  document.getElementById("streak").textContent = current;
+  document.getElementById("best-streak").textContent = best;
+  const done = doneCount(), total = totalProblems();
+  document.getElementById("done-count").textContent = `${done}/${total}`;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById("overall-pct").textContent = pct + "%";
+  document.getElementById("overall-bar").style.width = pct + "%";
+
+  // weeks
+  const container = document.getElementById("weeks");
+  const openWeeks = new Set([...container.querySelectorAll(".week.open")].map(el => el.dataset.week));
+  container.innerHTML = "";
+  for (const w of PLAN) {
+    const wDone = w.problems.filter(([t]) => {
+      const s = state[keyOf(w.week, t)]; return s && (s.status === "solo" || s.status === "editorial");
+    }).length;
+    const wEl = document.createElement("div");
+    wEl.className = "week" + (openWeeks.has(String(w.week)) || (nxt && nxt.week === w.week) ? " open" : "");
+    wEl.dataset.week = w.week;
+    wEl.innerHTML = `
+      <div class="week-head">
+        <div class="week-title">Week ${w.week} · ${w.title}</div>
+        <div class="week-meta">${wDone}/${w.problems.length}</div>
+      </div>
+      <div class="week-body"></div>
+    `;
+    const body = wEl.querySelector(".week-body");
+    for (const [title, slug, diff] of w.problems) {
+      const s = state[keyOf(w.week, title)];
+      const status = s?.status || "not-started";
+      const dotCls = status === "not-started" ? "" : status;
+      const row = document.createElement("div");
+      row.className = "prob";
+      row.innerHTML = `
+        <div class="dot ${dotCls}"></div>
+        <a href="https://leetcode.com/problems/${slug}/" target="_blank" rel="noopener">${title}</a>
+        <span class="diff ${diff}">${diff}</span>
+        <select data-week="${w.week}" data-title="${title}">
+          ${STATES.map(s => `<option value="${s}" ${s === status ? "selected" : ""}>${STATE_LABEL[s]}</option>`).join("")}
+        </select>
+      `;
+      body.appendChild(row);
+    }
+    wEl.querySelector(".week-head").addEventListener("click", () => wEl.classList.toggle("open"));
+    body.querySelectorAll("select").forEach(sel => {
+      sel.addEventListener("change", e => {
+        setStatus(parseInt(sel.dataset.week), sel.dataset.title, sel.value);
+      });
+    });
+    container.appendChild(wEl);
+  }
+}
+
+document.getElementById("export-btn").onclick = () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `dsa-tracker-${today()}.json`; a.click();
+  URL.revokeObjectURL(url);
+};
+document.getElementById("reset-btn").onclick = () => {
+  if (confirm("Wipe all progress? This cannot be undone.")) {
+    localStorage.removeItem(KEY);
+    state = {};
+    render();
+  }
+};
+
+render();
+</script>
+</body>
+</html>
